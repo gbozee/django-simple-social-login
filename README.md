@@ -36,7 +36,17 @@ FACEBOOK_ACCOUNT_KIT_APP_SECRET
 ```
 **Google only**
 
-GOOGLE_CLIENT_ID
+`GOOGLE_CLIENT_ID`
+
+`GOOGLE_CREATE_USER_CALLBACK` defaults to 
+```
+
+def create_user(cls, **user_data):
+    return cls.objects.create(
+        username=user_data['email'], email=user_data['email'],
+        first_name=user_data['first_name'], last_name=data['last_name'])
+
+```
 
 ## Signals to hook up to
 
@@ -93,9 +103,8 @@ Data include
 An example project is provided in the `example` folder for testing. Ensure you populate the required environmental variables listed in the `settings.py` of the project
 
 ## Todo
-1. add support to automatically log in social authentication methods with django.
-2. Provide better documentation
-
+1. Provide better documentation
+2. Control the json response that is sent back to the user
 
 **Contributions and suggestions are welcome**
 

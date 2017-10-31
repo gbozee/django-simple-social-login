@@ -8,6 +8,18 @@ from .utils import GoogleAPI
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView
 from django.shortcuts import reverse
+from . import signals as google_signals
+from django.contrib.auth import get_user_model, login
+from . import settings
+
+@receiver(google_signals.data_from_google_scope)
+def onGoogleData(sender, request, data, **kwargs):
+    User = get_user_model()
+    result = User.objects.filter(email=data['email']).first()
+    if not result:
+        result = settings.GOOGLE_CREATE_USER_CALLBACK(User, **data)
+    result.backend = 'django.contrib.auth.backends.ModelBackend'
+    login(request, result)
 
 
 def create_or_update_google_user(request):
