@@ -20,6 +20,7 @@ setup(
     author_email='gbozee@gmail.com',
     install_requires=[
         'requests',
+        'google-auth'
     ],
     classifiers=[
         'Environment :: Web Environment',
