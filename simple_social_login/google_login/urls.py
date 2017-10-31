@@ -11,6 +11,7 @@ from django.shortcuts import reverse
 from . import signals as google_signals
 from django.contrib.auth import get_user_model, login
 from . import settings
+from django.dispatch import receiver
 
 @receiver(google_signals.data_from_google_scope)
 def onGoogleData(sender, request, data, **kwargs):
