@@ -100,6 +100,9 @@ Data include
 
 `data`: this is a dict consisting of `email, first_name` and `last_name`
 
+`after_creating_google_user`: A signals to implement any logic after the user has been logged in. Data include `request`
+
+
 An example project is provided in the `example` folder for testing. Ensure you populate the required environmental variables listed in the `settings.py` of the project
 
 ## Todo
