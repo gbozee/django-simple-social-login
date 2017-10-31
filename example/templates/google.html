@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style type="text/css">
+        #customBtn {
+            display: inline-block;
+            background: white;
+            color: #444;
+            width: 190px;
+            border-radius: 5px;
+            border: thin solid #888;
+            box-shadow: 1px 1px 1px grey;
+            white-space: nowrap;
+        }
+
+        #customBtn:hover {
+            cursor: pointer;
+        }
+
+        span.label {
+            font-family: serif;
+            font-weight: normal;
+        }
+
+        span.icon {
+            background: url('/identity/sign-in/g-normal.png') transparent 5px 50% no-repeat;
+            display: inline-block;
+            vertical-align: middle;
+            width: 42px;
+            height: 42px;
+        }
+
+        span.buttonText {
+            display: inline-block;
+            vertical-align: middle;
+            padding-left: 42px;
+            padding-right: 42px;
+            font-size: 14px;
+            font-weight: bold;
+            /* Use the Roboto font that is loaded in the <head> */
+            font-family: 'Roboto', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="gSignInWrapper">
+        <span class="label">Sign in with:</span>
+        <div id="customBtn" class="customGPlusSignIn">
+            <span class="icon"></span>
+            <span class="buttonText">Google</span>
+        </div>
+    </div>
+    <div id="name"></div>
+    <script src="https://apis.google.com/js/api:client.js"></script>
+    <script>
+        window.GOOGLE_CLIENT_ID = "{{GOOGLE_CLIENT_ID}}"
+        var googleUser = {};
+        function startApp() {
+            gapi.load('auth2', function () {
+                // Retrieve the singleton for the GoogleAuth library and set up the client.
+                auth2 = gapi.auth2.init({
+                    client_id: window.GOOGLE_CLIENT_ID,
+                    cookiepolicy: 'single_host_origin',
+                    // Request scopes in addition to 'profile' and 'email'
+                    //scope: 'additional_scope'
+                });
+                attachSignin(auth2, document.getElementById('customBtn'));
+            });
+        };
+
+        function attachSignin(g_auth, element) {
+            console.log(element.id);
+            g_auth.attachClickHandler(element, {},
+                function (googleUser) {
+                    var name = googleUser.getBasicProfile().getName()
+                    var email = googleUser.getBasicProfile().getEmail()
+                    var google_id = googleUser.getBasicProfile().getId()
+                    var id_token = googleUser.getAuthResponse().id_token
+                    document.getElementById('name').innerText = "Signed in: " +
+                        name;
+                    myFetch('POST', "/google-login/", {
+                        body: JSON.stringify({
+                            token: id_token,
+                        })
+                    }, (response) => {
+                        console.log(response)
+                    })
+                }, function (error) {
+                    alert(JSON.stringify(error, undefined, 2));
+                });
+        }
+        startApp();
+        function myFetch(method, url, params, callback) {
+            if (method === 'POST') {
+            }
+            var myInit = {
+                method: method,
+            }
+            if (method === 'POST') {
+                var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                myHeaders.append("X-Requested-With", "XMLHttpRequest")
+                myHeaders.append("X-CSRFToken", window.APP_CSRF_TOKEN)
+                myInit = Object.assign(myInit, params, { headers: myHeaders, })
+            }
+            var myRequest = new Request(url, myInit);
+            fetch(myRequest).then(response => response.json())
+                .then(data => callback(data))
+        }
+    </script>
+
+</body>
+
+</html>

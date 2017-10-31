@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://sdk.accountkit.com/en_US/sdk.js"></script>
+</head>
+
+<body>
+    <input value="+1" id="country_code" />
+    <input placeholder="phone number" id="phone_number" />
+    <button onclick="smsLogin();">Login via SMS</button>
+    {% comment %}
+    <button onclick="onLogin();">Social Login</button> {% endcomment %}
+    <div>OR</div>
+    <input placeholder="email" id="email" />
+    <button onclick="emailLogin();">Login via Email</button>
+    <script>
+        console.log("{{csrf_token}}")
+        console.log("{% csrf_token %}")
+        window.APP_CSRF_TOKEN = "{{csrf_token}}"
+        window.FACBOOK_CLIENT_ID = "{{FACEBOOK_APP_ID}}"
+        window.FACEBOOK_REDIRECT_URL = "{{REDIRECT_URL}}"
+        window.FACBOOK_SCOPES = 'public_profile,email,user_birthday'
+        window.FACEBOOK_ACCOUNT_KIT_API_VERSION = "{{ACCOUNT_KIT_API_VERSION}}"
+
+        // initialize Account Kit with CSRF protection
+        AccountKit_OnInteractive = function () {
+            AccountKit.init(
+                {
+                    appId: window.FACBOOK_CLIENT_ID,
+                    state: window.APP_CSRF_TOKEN,
+                    version: window.FACEBOOK_ACCOUNT_KIT_API_VERSION,
+                    fbAppEventsEnabled: true,
+                    redirect: window.FACEBOOK_REDIRECT_URL,
+                    debug: true,
+                }
+            );
+        };
+
+        // login callback
+        function loginCallback(response) {
+            console.log(response)
+            if (response.status === "PARTIALLY_AUTHENTICATED") {
+                var code = response.code;
+                var csrf = response.state;
+                verifyCode(code, csrf)
+                // Send code to server to exchange for access token
+            }
+            else if (response.status === "NOT_AUTHENTICATED") {
+                // handle authentication failure
+            }
+            else if (response.status === "BAD_PARAMS") {
+                // handle bad parameters
+            }
+        }
+
+        // phone form submission handler
+        function smsLogin() {
+            var countryCode = document.getElementById("country_code").value;
+            var phoneNumber = document.getElementById("phone_number").value;
+            AccountKit.login(
+                'PHONE',
+                { countryCode: "+234", phoneNumber: "" }, // will use default values if not specified
+                loginCallback
+            );
+        }
+
+
+        // email form submission handler
+        function emailLogin() {
+            var emailAddress = document.getElementById("email").value;
+            AccountKit.login(
+                'EMAIL',
+                { emailAddress: "" },
+                loginCallback
+            );
+        }
+        function verifyCode(code, csrf) {
+            myFetch('POST', '/account-kit-validate/', {
+                body: JSON.stringify({
+                    code,
+                    csrfmiddlewaretoken: csrf
+                })
+            }, (response) => {
+                console.log(response)
+            })
+        }
+        function myFetch(method, url, params, callback) {
+            if (method === 'POST') {
+            }
+            var myInit = {
+                method: method,
+            }
+            if (method === 'POST') {
+                var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                myHeaders.append("X-Requested-With", "XMLHttpRequest")
+                myHeaders.append("X-CSRFToken", window.APP_CSRF_TOKEN)
+                myInit = Object.assign(myInit, params, { headers: myHeaders, })
+            }
+            var myRequest = new Request(url, myInit);
+            fetch(myRequest).then(response => response.json())
+                .then(data => callback(data))
+        }
+        function facebookLoginFunction() {
+            // Load the SDK asynchronously
+            (function (d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s); js.id = id;
+                js.src = "//connect.facebook.net/en_US/sdk.js";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+            window.fbAsyncInit = function () {
+                FB.init({
+                    appId: '{{FACEBOOK_APP_ID}}',
+                    cookie: true,  // enable cookies to allow the server to access 
+                    // the session
+                    xfbml: true,  // parse social plugins on this page
+                    version: 'v2.8' // use graph api version 2.8
+                });
+                FB.getLoginStatus(function (response) {
+                    statusChangeCallback(response);
+                });
+
+            };
+            function onLogin() {
+                FB.login(function (response) {
+                    // handle the response
+                    statusChangeCallback(response)
+                }, { scope: window.FACBOOK_SCOPES });
+            }
+            // This is called with the results from from FB.getLoginStatus().
+
+            function updateServer(data, access_token) {
+                myFetch('POST', `/facebook-login/?access_token=${access_token}`,
+                    { body: JSON.stringify(data) }, (data) => {
+                        console.log(data)
+                        getLongLivedToken(data.code)
+                    })
+            }
+            function statusChangeCallback(response) {
+                console.log('statusChangeCallback');
+                console.log(response);
+                // The response object is returned with a status field that lets the
+                // app know the current login status of the person.
+                // Full docs on the response object can be found in the documentation
+                // for FB.getLoginStatus().
+                if (response.status === 'connected') {
+                    testAPI(response.authResponse.accessToken);
+                } else {
+                    // The person is not logged into your app or we are unable to tell.
+                    console.log("not logged in")
+                }
+            }
+            function testAPI(access_token) {
+                console.log('Welcome!  Fetching your information.... ');
+                FB.api('/me?fields=id,name,email,birthday', function (response) {
+                    console.log('Successful login for: ' + response.name);
+                    console.log(response)
+                    updateServer(response, access_token)
+                });
+            }
+            function getLongLivedToken(access_code, machine_code = null) {
+                let url = `https://graph.facebook.com/oauth/access_token?code=${access_code}&client_id=${window.FACBOOK_CLIENT_ID}&redirect_uri=${window.FACEBOOK_REDIRECT_URL}`
+                if (!!machine_code) {
+                    url = `${url}&machine_code=${machine_code}`
+                }
+                myFetch('GET', url, {}, response => {
+                    console.log(response)
+                })
+            }
+            function checkLoginState() {
+                FB.getLoginStatus(function (response) {
+                    statusChangeCallback(response);
+                });
+            }
+        }
+
+    </script>
+
+
+</body>
+
+</html>
