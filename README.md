@@ -19,8 +19,15 @@ FACEBOOK_APP_ID
 
 FACEBOOK_APP_SECRET
 
-FACEBOOK_REDIRECT_URL defaults to
+FACEBOOK_REDIRECT_URL defaults to `http://{{site.domain}}/{{reverse('fb_login.redirect_view)}}`
 
+`FB_CREATE_USER_CALLBACK`: An optional callback function that creates a `User` based on the information gotten from `Facebook`
+
+A sample look like this
+```
+def create_user(cls, email=None,name=None, birthday=None, **kwargs):
+    return cls.objects.create(email=email,username=email)
+```
 **AccountKit Only**
 ```
 FACEBOOK_ACCOUNT_KIT_API_VERSION (defaults to "v1.2")

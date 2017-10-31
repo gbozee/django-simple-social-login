@@ -15,3 +15,13 @@ FACEBOOK_REDIRECT_URL = getattr(
     settings, "FACEBOOK_REDIRECT_URL", None
 )
 FACEBOOK_APP_VERSION = getattr(settings, "FACEBOOK_APP_VERSION", "v2.10")
+
+
+def create_user(cls, **user_data):
+    return cls.objects.create(
+        username=user_data['email'], email=user_data['email'],
+        first_name=user_data['name'])
+
+
+FB_CREATE_USER_CALLBACK = getattr(
+    settings, "FB_CREATE_USER_CALLBACK", create_user)

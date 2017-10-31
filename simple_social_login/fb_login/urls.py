@@ -10,6 +10,20 @@ from .utils import FacebookAPI
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView
 from django.shortcuts import reverse
+from django.dispatch import receiver
+from django.contrib.auth import get_user_model, login
+from . import settings
+
+
+@receiver(fb_signals.data_from_fb_scope)
+def onClientData(sender, request, **kwargs):
+    User = get_user_model()
+    user_data = kwargs.get('data')
+    result = User.objects.filter(email=user_data['email']).first()
+    if not result:
+        result = settings.FB_CREATE_USER_CALLBACK(User, **user_data)
+    result.backend = 'django.contrib.auth.backends.ModelBackend'
+    login(request, result)
 
 
 def create_or_update_user(request):
