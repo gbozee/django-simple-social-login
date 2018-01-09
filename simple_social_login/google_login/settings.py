@@ -6,7 +6,7 @@ GOOGLE_CLIENT_ID = getattr(settings, "GOOGLE_CLIENT_ID", None)
 def create_user(cls, **user_data):
     return cls.objects.create(
         username=user_data['email'], email=user_data['email'],
-        first_name=user_data['first_name'], last_name=data['last_name'])
+        first_name=user_data['first_name'], last_name=user_data['last_name'])
 
 
 GOOGLE_URL_ON_SUCCESS = getattr(
