@@ -24,7 +24,8 @@ class GoogleAPI(object):
             data = {
                 'email': idinfo.get('email'),
                 'first_name': idinfo.get('given_name'),
-                'last_name': idinfo.get('family_name')
+                'last_name': idinfo.get('family_name'),
+                'id': userid
             }
             fb_signals.data_from_google_scope.send(sender=None, data=data,request=request)
             return data
