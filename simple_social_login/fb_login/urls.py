@@ -17,11 +17,11 @@ from . import settings
 
 @receiver(fb_signals.data_from_fb_scope)
 def onClientData(sender, request, **kwargs):
-    User = get_user_model()
-    user_data = kwargs.get('data')
-    result = User.objects.filter(email=user_data['email']).first()
-    if not result:
-        result = settings.FB_CREATE_USER_CALLBACK(User, **user_data)
+    #User = get_user_model()
+    #user_data = kwargs.get('data')
+    #result = User.objects.filter(email=user_data['email']).first()
+    #if not result:
+    #    result = settings.FB_CREATE_USER_CALLBACK(User, **user_data)
     # result.backend = 'django.contrib.auth.backends.ModelBackend'
     # login(request, result)
     pass
