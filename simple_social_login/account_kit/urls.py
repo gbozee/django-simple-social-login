@@ -39,9 +39,9 @@ def redirect_uri(request):
 
 
 urlpatterns = [
-    url(r'^account-kit/validate/$',
+    url(r'^validate/$',
         csrf_exempt(account_kit_authenticate), name="verify"),
-    url(r'^account-kit/redirect/$', SuccessView.as_view(),
+    url(r'^redirect/$', SuccessView.as_view(),
         name='redirect'),
-    url(r'^account-kit/redirect-view/$', redirect_uri, name='redirect_on_success')
+    url(r'^redirect-view/$', redirect_uri, name='redirect_on_success')
 ]
