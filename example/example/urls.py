@@ -20,9 +20,9 @@ from django.http import JsonResponse
 from django.conf import settings
 import json
 from . import signals as fb_signals
-from simple_s_login.account_kit.utils import AccountKitAPI
-from simple_s_login.fb_login.utils import FacebookAPI
-from simple_s_login.google_login.utils import GoogleAPI
+from simple_social_login.account_kit.utils import AccountKitAPI
+from simple_social_login.fb_login.utils import FacebookAPI
+from simple_social_login.google_login.utils import GoogleAPI
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView
 
@@ -101,8 +101,8 @@ urlpatterns = [
     url(r'^hello/$', redirect_uri, name='account_kit_redirect_uri'),
     url(r'^admin/', admin.site.urls),
     url(r'^account_kit/',
-        include("simple_s_login.account_kit.urls", namespace="account_kit")),
-    url(r'^fb_login/', include("simple_s_login.fb_login.urls", namespace="fb_login")),
+        include("simple_social_login.account_kit.urls", namespace="account_kit")),
+    url(r'^fb_login/', include("simple_social_login.fb_login.urls", namespace="fb_login")),
     url(r'^google_login/',
-        include("simple_s_login.google_login.urls", namespace="google_login"))
+        include("simple_social_login.google_login.urls", namespace="google_login"))
 ]
