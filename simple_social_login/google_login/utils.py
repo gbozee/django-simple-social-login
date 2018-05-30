@@ -14,10 +14,12 @@ class GoogleAPI(object):
 
     def verify_token(self, token, request=None):
         try:
-            idinfo = id_token.verify_oauth2_token(
-                token, g_requests.Request(), self.client_id)
-            
-            if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+            idinfo = id_token.verify_oauth2_token(token, g_requests.Request(),
+                                                  self.client_id)
+
+            if idinfo['iss'] not in [
+                    'accounts.google.com', 'https://accounts.google.com'
+            ]:
                 raise GoogleAPIError('Wrong issuer.')
 
             userid = idinfo['sub']
@@ -27,8 +29,12 @@ class GoogleAPI(object):
                 'last_name': idinfo.get('family_name'),
                 'id': userid
             }
-            fb_signals.data_from_google_scope.send(sender=None, data=data,request=request)
+            self.call_signal(data=data, request=request)
             return data
         except ValueError:
             # Invalid token
             raise GoogleAPIError("The token sent to the server is invalid")
+
+    def call_signal(self, **kwargs):
+        fb_signals.data_from_google_scope.send(
+            sender=None, **kwargs)

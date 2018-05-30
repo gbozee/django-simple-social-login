@@ -1,4 +1,3 @@
-
 from django.conf.urls import url
 from django.http import JsonResponse
 from . import settings
@@ -49,7 +48,8 @@ def redirect_uri(request):
 
 
 urlpatterns = [
-    url(r'^validate/$', csrf_exempt(create_or_update_google_user),
+    url(r'^validate/$',
+        csrf_exempt(create_or_update_google_user),
         name="verify"),
     url(r'^redirect/$', SuccessView.as_view(), name='google_redirect_uri'),
     url(r'^redirect-view/$', redirect_uri, name='redirect_on_success')
