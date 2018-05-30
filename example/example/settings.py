@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'simple_social_login'
 ]
 
 MIDDLEWARE = [
@@ -50,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'simple_social_login.urls'
+ROOT_URLCONF = 'example.urls'
 
 TEMPLATES = [
     {
@@ -68,7 +69,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'simple_social_login.wsgi.application'
+WSGI_APPLICATION = 'example.wsgi.application'
 
 
 # Database

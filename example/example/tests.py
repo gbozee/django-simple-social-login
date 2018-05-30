@@ -4,11 +4,11 @@ try:
     from unittest import mock
 except ImportError:
     import mock
-from simple_s_login.account_kit.utils import sign_request, date_to_expire
+from simple_social_login.account_kit.utils import sign_request, date_to_expire
 from django.dispatch import receiver
-from simple_s_login.account_kit import signals as account_kit_signals
-from simple_s_login.fb_login import signals as fb_signals
-from simple_s_login.google_login import signals as google_signals
+from simple_social_login.account_kit import signals as account_kit_signals
+from simple_social_login.fb_login import signals as fb_signals
+from simple_social_login.google_login import signals as google_signals
 from django.shortcuts import reverse
 from django.conf import settings
 import datetime
@@ -117,7 +117,7 @@ class SocialAPITestCase(TestCase):
         return self.client.post(url, content_type='application/json', HTTP_X_REQUESTED_WITH='XMLHttpRequest',
                                 **kwargs)
 
-    @mock.patch("simple_s_login.account_kit.utils.timezone.now")
+    @mock.patch("simple_social_login.account_kit.utils.timezone.now")
     def test_account_kit_validates_request(self, mock_time_zone):
         mock_time_zone.return_value = datetime.datetime(2016, 10, 12, 3, 4, 2)
         url = reverse('account_kit:verify')
@@ -125,7 +125,7 @@ class SocialAPITestCase(TestCase):
         self.account_kit_action(
             lambda: self.post(url, data=json.dumps({'code': "12345"})))
 
-    @mock.patch("simple_s_login.account_kit.utils.timezone.now")
+    @mock.patch("simple_social_login.account_kit.utils.timezone.now")
     def test_account_kit_redirect_url_navigates_correctly(self, mock_time_zone):
         mock_time_zone.return_value = datetime.datetime(2016, 10, 12, 3, 4, 2)
 
@@ -168,7 +168,7 @@ class SocialAPITestCase(TestCase):
             mock.call(access_token="cd", expires_at=date_to_expire(30))
         ])
 
-    @mock.patch("simple_s_login.fb_login.utils.timezone.now")
+    @mock.patch("simple_social_login.fb_login.utils.timezone.now")
     def test_facebook_login_validation(self, mock_time_zone):
         mock_time_zone.return_value = datetime.datetime(2016, 10, 12, 3, 4, 2)
         url = reverse('fb_login:verify')
@@ -182,7 +182,7 @@ class SocialAPITestCase(TestCase):
         response = self.client.get(response.url)
         self.assertEqual(response.json(), {})
 
-    @mock.patch('simple_s_login.google_login.utils.id_token.verify_oauth2_token')
+    @mock.patch('simple_social_login.google_login.utils.id_token.verify_oauth2_token')
     def test_google_login_validation(self, mock_request):
         mock_request.return_value = {
             'email': "j@example.com",
