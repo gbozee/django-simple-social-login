@@ -29,12 +29,12 @@ class GoogleAPI(object):
                 'last_name': idinfo.get('family_name'),
                 'id': userid
             }
-            self.call_signal(data=data, request=request)
+            self.call_signal(idinfo, data=data, request=request)
             return data
         except ValueError:
             # Invalid token
             raise GoogleAPIError("The token sent to the server is invalid")
 
-    def call_signal(self, **kwargs):
+    def call_signal(self,idinfo, **kwargs):
         fb_signals.data_from_google_scope.send(
             sender=None, **kwargs)
